@@ -7,7 +7,7 @@ class Authentication(models.Model):
     update_at=models.DateTimeField( auto_now=True)
 
     def __str__(self):
-        return self.user_name
+        return self.username
 
 
 
@@ -27,10 +27,15 @@ class Users(models.Model):
     create_at=models.DateTimeField( auto_now_add=True)
     update_at=models.DateTimeField( auto_now=True)
 
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
 
 
 class Provinces(models.Model):
     title=models.CharField( max_length=50)
+    def __str__(self):
+        return f'{self.title}'
 
 
 
@@ -43,19 +48,22 @@ class Address(models.Model):
     full_address=models.CharField( max_length=255)
     provinc_id=models.ForeignKey(Provinces,  on_delete=models.CASCADE)
     city_id=models.ForeignKey(Cites,on_delete=models.CASCADE)
-
+    def __str__(self):
+        return f'{self.provinc_id}'
 
 
 class Organization(models.Model):
     establishment_name=models.CharField( max_length=50)
     brand=models.CharField( max_length=50)
-    owener_id=models.ForeignKey(Users, on_delete=models.CASCADE)
+    owner_id =models.ForeignKey(Users, on_delete=models.CASCADE)
     rate=models.FloatField()
     phone_number=models.IntegerField()
-    address_id=models.ForeignKey(Address, verbose_name=_(""), on_delete=models.CASCADE)
+    address_id=models.ForeignKey(Address,on_delete=models.CASCADE)
     create_at=models.DateTimeField( auto_now_add=True)
     update_at=models.DateTimeField( auto_now=True)
     org_name=models.CharField( max_length=50)
+    def __str__(self):
+        return f'{self.establishment_name}'
 
 
 
@@ -66,7 +74,7 @@ class Texts (models.Model):
 
 
 
-class Comments(models.model):
+class Comments(models.Model):
     user_id=models.ForeignKey( Users, on_delete=models.CASCADE)
     org_id=models.ForeignKey(Organization, on_delete=models.CASCADE)
     parent_id=models.IntegerField()

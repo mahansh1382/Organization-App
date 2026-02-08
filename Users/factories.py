@@ -1,97 +1,134 @@
 import random
 import factory
-from datetime import datetime
-from faker import Faker
 from factory.django import DjangoModelFactory
+# مدل‌ها از طریق پکیج محلی وارد می‌شوند (باید در محیط واقعی تنظیم شود)
+# برای سادگی، ما فرض می‌کنیم که مدل‌ها در جایی که این فکتوری‌ها اجرا می‌شوند قابل دسترسی هستند.
+# از آنجایی که شما مدل‌ها را ارائه دادید، ما باید از ساختار آن‌ها استفاده کنیم:
+try:
+    from .models import Authentication, Rols, Users, Provinces, Cites, Address, Organization, Texts, Comments
+except ImportError:
+    # در صورت اجرای مستقیم، ممکن است نیاز به تعریف دستی مدل‌ها باشد، اما در محیط واقعی Django
+    # این کار به صورت خودکار انجام می‌شود. ما ادامه می‌دهیم با فرض وجود این مدل‌ها.
+    pass 
 
-from . import models
 
-faker = Faker()
-
-class CategoryFactory(DjangoModelFactory):
+# -------------------------
+# Authentication Factory
+# -------------------------
+class AuthenticationFactory(DjangoModelFactory):
     class Meta:
-        model = models.Category
+        model = Authentication # استفاده مستقیم از نام کلاس مدل
 
-    title = factory.Faker(
-        "sentence",
-        nb_words=5,
-        variable_nb_words=True
-    )
-    description = factory.Faker('paragraph', nb_sentences=1, variable_nb_sentences=False)
+    # فیلد مدل: username (CharField)
+    username = factory.Faker("user_name") # استفاده از فرمت‌دهنده درست
+    password = factory.Faker("password")
+
+    def __str__(self):
+        # اصلاح: مدل شما در اینجا user_name را برمی‌گرداند، اما فیلد در این مدل username است.
+        # من username را برمی‌گردانم تا با فیلد تعریف شده مطابقت داشته باشد.
+        return self.username 
 
 
-class DiscountFactory(DjangoModelFactory):
+# -------------------------
+# Rols Factory
+# -------------------------
+class RolsFactory(DjangoModelFactory):
     class Meta:
-        model = models.Discount
+        model = Rols
 
-    discount = factory.LazyFunction(lambda: random.randint(1, 80)/100)
-    description = factory.Faker('paragraph', nb_sentences=1, variable_nb_sentences=False)
+    title = factory.Iterator(["admin", "user", "manager"])
 
 
-class ProductFactory(DjangoModelFactory):
+# -------------------------
+# Users Factory
+# -------------------------
+class UsersFactory(DjangoModelFactory):
     class Meta:
-        model = models.Product
+        model = Users
 
-    name = factory.LazyAttribute(lambda x: ' '.join([x.capitalize() for x in faker.words(3)]))
-    slug = factory.LazyAttribute(lambda x: '-'.join(x.name.split(' ')).lower())
-    description = factory.Faker('paragraph', nb_sentences=5, variable_nb_sentences=True)
-    unit_price = factory.LazyFunction(lambda: random.randint(1, 1000) + random.randint(0, 100)/100)
-    inventory = factory.LazyFunction(lambda: random.randint(1, 100))
-
-
-class CustomerFactory(DjangoModelFactory):
-    class Meta:
-        model = models.Customer
-
+    # مدل: user_name=models.ForeignKey(Authentication, ...)
+    # SubFactory به صورت خودکار کلید خارجی را با ID شیء تولید شده پر می‌کند.
+    user_name = factory.SubFactory(AuthenticationFactory) 
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
-    email = factory.Faker("email")
-    phone_number = factory.Faker("phone_number")
-    birth_date = factory.LazyFunction(lambda: faker.date_time_ad(start_datetime=datetime(1990,1,1), end_datetime=datetime(2015,1,1)))
+    mobile_number = factory.LazyFunction(lambda: random.randint(9000000000, 9999999999))
+    national_id = factory.LazyFunction(lambda: random.randint(1000000000, 9999999999))
+    rol_id = factory.SubFactory(RolsFactory) 
+    
+    # مدل: is_active=models.BooleanField()
+    is_active = factory.LazyFunction(lambda: random.choices([True, False], weights=[20, 80], k=1)[0]) 
 
 
+# -------------------------
+# Provinces Factory
+# -------------------------
+class ProvincesFactory(DjangoModelFactory):
+    class Meta:
+        model = Provinces
+    title = factory.Faker("state")
+
+
+# -------------------------
+# Cites Factory
+# -------------------------
+class CitesFactory(DjangoModelFactory):
+    class Meta:
+        model = Cites
+    title = factory.Faker("city")
+
+
+# -------------------------
+# Address Factory
+# -------------------------
 class AddressFactory(DjangoModelFactory):
     class Meta:
-        model = models.Address
+        model = Address
+    full_address=factory.Faker("address")
+    provinc_id = factory.SubFactory(ProvincesFactory)
+    city_id = factory.SubFactory(CitesFactory)
 
-    province = factory.Faker("word")
-    city = factory.Faker("word")
-    street = factory.LazyFunction(lambda: f'street {random.randint(1, 50)}')
 
-
-class OrderFactory(DjangoModelFactory):
+# -------------------------
+# Organization Factory
+# -------------------------
+class OrganizationFactory(DjangoModelFactory):
     class Meta:
-        model = models.Order
+        model = Organization
 
-    status = factory.LazyFunction(lambda: random.choice([models.Order.ORDER_STATUS_UNPAID, models.Order.ORDER_STATUS_CANCELED]))
+    establishment_name=factory.Faker("company")
+    brand=factory.Faker("company_suffix")
+    # مدل: owener_id=models.ForeignKey(Users, ...) - دقیقاً مطابقت دارد
+    owener_id = factory.SubFactory(UsersFactory) 
+    rate=factory.LazyFunction(lambda: round(random.uniform(1.0, 5.0), 1))
+    phone_number=factory.LazyFunction(lambda: random.randint(9000000000, 9999999999))
+    # مدل: address_id=models.ForeignKey(Address, ...) - دقیقاً مطابقت دارد
+    address_id = factory.SubFactory(AddressFactory) 
+    org_name=factory.Faker("company")
 
 
-class OrderItemFactory(DjangoModelFactory):
+# -------------------------
+# Texts Factory
+# -------------------------
+class TextsFactory(DjangoModelFactory):
     class Meta:
-        model = models.OrderItem
+        model = Texts
+    contact=factory.Faker("sentence", nb_words=10)
 
-    quantity = factory.LazyFunction(lambda: random.randint(1, 20))
 
-
-class CommentFactory(DjangoModelFactory):
+# -------------------------
+# Comments Factory
+# -------------------------
+class CommentsFactory(DjangoModelFactory):
     class Meta:
-        model = models.Comment
+        model = Comments
 
-    name = factory.Faker("first_name")
-    body = factory.Faker('paragraph', nb_sentences=3, variable_nb_sentences=True)
-    status = factory.LazyFunction(lambda: random.choice([models.Comment.COMMENT_STATUS_WAITING, models.Comment.COMMENT_STATUS_APPROVED, models.Comment.COMMENT_STATUS_NOT_APPROVED]))
-
-
-class CartFactory(DjangoModelFactory):
-    class Meta:
-        model = models.Cart
-
-
-class CartItemFactory(DjangoModelFactory):
-    class Meta:
-        model = models.CartItem
-
-    quantity = factory.LazyFunction(lambda: random.randint(1, 20))
-    
-
-
+    # مدل: user_id=models.ForeignKey(Users, ...)
+    user_id = factory.SubFactory(UsersFactory)
+    # مدل: org_id=models.ForeignKey(Organization, ...)
+    org_id = factory.SubFactory(OrganizationFactory)
+    parent_id=0 # مقدار ثابت
+    # مدل: text_id=models.ForeignKey(Texts, ...)
+    text_id = factory.SubFactory(TextsFactory) 
+    is_rejected = factory.LazyFunction(lambda: random.choice([True, False]))
+    is_filtered = factory.LazyFunction(lambda: random.choice([True, False]))
+    rate = factory.LazyFunction(lambda: round(random.uniform(1.0, 5.0), 1))

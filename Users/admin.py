@@ -3,7 +3,7 @@ from django.contrib import admin
 from Users.models import Authentication, Users
 @admin.register(Authentication)
 class AdminAuthentication(admin.ModelAdmin):
-    list_display=['username']
+    pass
 
 
 @admin.register(Users)

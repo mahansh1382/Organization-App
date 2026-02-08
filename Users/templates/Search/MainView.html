@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جستجوی سازمان</title>
+<style>
+body {
+    font-family: Tahoma, sans-serif;
+    background: linear-gradient(135deg, #e3f2fd, #f9f9f9);
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 50px;
+    color: #2c3e50;
+}
+
+.search-box {
+    margin: 30px auto;
+}
+
+form {
+    display: inline-flex;
+    width: 70%;
+    max-width: 700px;
+}
+
+#searchInput {
+    flex: 1;
+    padding: 16px;
+    font-size: 18px;
+    border: 2px solid #ccc;
+    border-left: none;
+    border-radius: 0 35px 35px 0;
+    outline: none;
+}
+
+button {
+    padding: 16px 30px;
+    font-size: 18px;
+    border: none;
+    background: #3498db;
+    color: white;
+    cursor: pointer;
+    border-radius: 35px 0 0 35px;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+/* ---------- Grid Container ---------- */
+#result-area {
+    max-width: 1200px;
+    margin: 40px auto 80px;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* سه کارت در یک ردیف */
+    gap: 20px;
+    text-align: right;
+}
+
+.result-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.result-card a {
+    font-size: 18px;
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.result-card a:hover {
+    text-decoration: underline;
+}
+
+.result-card .field {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}
+
+.no-result {
+    color: #999;
+    padding: 15px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    .results-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+
+<h1>جستجوی سازمان</h1>
+
+<div class="search-box">
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text"
+               name="searched"
+               id="searchInput"
+               placeholder="نام سازمان را وارد کنید..."
+               value="{{ search_term|default:'' }}">
+        <button type="submit">جستجو</button>
+    </form>
+</div>
+
+{% if search_term %}
+<div id="result-area">
+    <h2>نتایج برای "{{ search_term }}"</h2>
+
+    {% if results %}
+    <div class="results-grid">
+        {% for org in results %}
+        <div class="result-card">
+            <a href="{% url 'detailview' org.id %}">{{ org.establishment_name }}</a>
+            <div class="field">Brand: {{ org.brand }}</div>
+            <div class="field">Owner: {{ org.owner_id }}</div>
+            <div class="field">Rate: {{ org.rate }}%</div>
+            <div class="field">Phone: {{ org.phone_number }}</div>
+            <div class="field">Address: {{ org.address_id }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-result">
+        نتیجه‌ای پیدا نشد.
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+</body>
+</html>

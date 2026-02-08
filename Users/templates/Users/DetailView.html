@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ org.establishment_name }}</title>
+<style>
+body {
+    font-family: Tahoma, sans-serif;
+    background: #f3f4f6;
+    margin: 0;
+    padding: 0;
+    text-align: right;
+}
+
+.container {
+    max-width: 900px;
+    margin: 50px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+h1 {
+    color: #1e3a8a;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.data-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px dashed #e5e7eb;
+    font-size: 16px;
+}
+
+.data-item:last-child {
+    border-bottom: none;
+}
+
+.label {
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.value {
+    font-weight: 500;
+    color: #111827;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #3498db;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.back-link:hover {
+    background: #1e40af;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>{{ org.establishment_name }}</h1>
+
+    <div class="data-item">
+        <span class="label">Brand:</span>
+        <span class="value">{{ org.brand }}</span>
+    </div>
+    <div class="data-item">
+        <span class="label">Owner:</span>
+        <span class="value">{{ org.owner_id.last_name }}</span>
+    </div>
+    <div class="data-item">
+        <span class="label">Rate:</span>
+        <span class="value">{{ org.rate }}%</span>
+    </div>
+    <div class="data-item">
+        <span class="label">Phone Number:</span>
+        <span class="value">{{ org.phone_number }}</span>
+    </div>
+    <div class="data-item">
+        <span class="label">Address:</span>
+        <span class="value">{{ org.address_id }}</span>
+    </div>
+
+    <a href="" class="back-link">بازگشت به نتایج جستجو</a>
+</div>
+
+</body>
+</html>
